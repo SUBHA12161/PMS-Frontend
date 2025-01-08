@@ -1,0 +1,16 @@
+.container-cls {
+    max-width: 400px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px;
+    margin-top: 7%;
+}
+
+.navbar-nav .active {
+    font-weight: bold;
+    color: #fff;
+}
+
+.right-float-btn {
+    float: right;
+}
