@@ -19,8 +19,8 @@ const EmployeeList = () => {
         try {
             const url =
                 user.role === "Admin"
-                    ? `${process.env.REACT_APP_API_BASE_URL}/api/employees?page=${currentPage}&perPage=${perPage}`
-                    : `${process.env.REACT_APP_API_BASE_URL}/api/employees?managerId=${user._id || ""}&page=${currentPage}&perPage=${perPage}`;
+                    ? `${process.env.REACT_APP_API_BASE_URL}/employees?page=${currentPage}&perPage=${perPage}`
+                    : `${process.env.REACT_APP_API_BASE_URL}/employees?managerId=${user._id || ""}&page=${currentPage}&perPage=${perPage}`;
             const response = await fetch(url);
             const data = await response.json();
             setEmployees(data.employees);
