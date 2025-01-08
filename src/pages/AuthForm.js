@@ -8,6 +8,8 @@ import axios from "axios";
 import "../assets/css/AuthForm.css";
 
 const AuthForm = () => {
+    
+  console.log(`url == ${process.env.REACT_APP_API_BASE_URL}`);
     const [isRightPanelActive, setRightPanelActive] = useState(false);
     const navigate = useNavigate();
     const { login, register } = useContext(AuthContext);
@@ -261,7 +263,7 @@ const AuthForm = () => {
                         <h1>Sign In</h1>
                         <input
                             autoComplete="off"
-                            className={errors.email ? "invalid-input" : ""}
+                            className={errors.email ? "invalid-input mt-3" : "mt-3"}
                             name="email"
                             type="email"
                             value={signInData.email}
@@ -272,7 +274,7 @@ const AuthForm = () => {
                         {errors.email && <span className="error-message">{errors.email}</span>}
                         <input
                             autoComplete="off"
-                            className={errors.password ? "invalid-input" : ""}
+                            className={errors.password ? "invalid-input mt-3" : "mt-3"}
                             name="password"
                             type="password"
                             value={signInData.password}
@@ -281,7 +283,7 @@ const AuthForm = () => {
                             invalid={!!errors.password}
                         />
                         {errors.password && <span className="error-message">{errors.password}</span>}
-                        <button type="submit" disabled={loading} className="mt-5">
+                        <button type="submit" disabled={loading} className="mt-3">
                             {loading ?
                                 <div class="loader"></div>
                                 :
@@ -300,7 +302,7 @@ const AuthForm = () => {
                         <div className="overlay-panel overlay-right">
                             <h1>Hello, Buddy!</h1>
                             <p>Enter your personal details and start your journey with us</p>
-                            <button className="ghost" onClick={handleSignUpClick}>Sign Up</button>
+                            <button className="ghost mt-3" onClick={handleSignUpClick}>Sign Up</button>
                         </div>
                     </div>
                 </div>
