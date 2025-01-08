@@ -281,7 +281,7 @@ const AuthForm = () => {
                             invalid={!!errors.password}
                         />
                         {errors.password && <span className="error-message">{errors.password}</span>}
-                        <button type="submit" disabled={loading}>
+                        <button type="submit" disabled={loading} className="mt-5">
                             {loading ?
                                 <div class="loader"></div>
                                 :
