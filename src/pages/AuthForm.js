@@ -8,8 +8,6 @@ import axios from "axios";
 import "../assets/css/AuthForm.css";
 
 const AuthForm = () => {
-    
-  console.log(`url == ${process.env.REACT_APP_API_BASE_URL}`);
     const [isRightPanelActive, setRightPanelActive] = useState(false);
     const navigate = useNavigate();
     const { login, register } = useContext(AuthContext);
