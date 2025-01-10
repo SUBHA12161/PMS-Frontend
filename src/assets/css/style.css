@@ -14,3 +14,8 @@
 .right-float-btn {
     float: right;
 }
+
+#root {
+    background-color: #6c757d;
+    height: 100%;
+}

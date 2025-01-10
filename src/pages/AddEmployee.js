@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { Form, FormGroup, Label, Input, Button, Alert, Card, CardBody } from "reactstrap";
+import React, { useState, useEffect, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+import { Form, FormGroup, Label, Input, Alert, Card, CardBody, CardHeader } from "reactstrap";
 
 const AddEmployee = () => {
     const [form, setForm] = useState({ name: "", email: "", designation: "", managerId: "", password: "" });
     const [managers, setManagers] = useState([]);
     const [message, setMessage] = useState("");
+    const { logout, isTokenExpired } = useContext(AuthContext);
+    const token = localStorage.getItem("token");
 
     const handleInputChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -31,33 +34,51 @@ const AddEmployee = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // If managerId is empty, set it to null before submitting
         const sanitizedForm = {
             ...form,
-            managerId: form.managerId === "" ? null : form.managerId
+            managerId: form.managerId === "" ? null : form.managerId,
         };
 
         try {
-            const response = await fetch("/employees", {
+            if(isTokenExpired(token)){
+                alert("Token has expired. Logging out...");
+                logout();
+                return;
+            }
+            const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/emp/add`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                 body: JSON.stringify(sanitizedForm),
             });
             const data = await response.json();
             setMessage(response.ok ? "Employee added successfully" : data.message || "Error adding employee");
+            setTimeout(() => {
+                setForm({ name: "", email: "", designation: "", managerId: "", password: "" });
+                setMessage("");
+            }, 3000);
         } catch (error) {
             setMessage("Error: Unable to add employee");
+            setTimeout(() => {
+                logout();
+            }, 2000);
         }
     };
 
+    const inputStyle = { width: "100%" };
+
     return (
-        <div className="d-flex justify-content-center align-items-center">
-            <Card className="mt-5">
+        <div className="d-flex justify-content-center align-items-center vh-100">
+            <Card className="shadow-sm" style={{ width: "450px", alignItems: 'left' }}>
+                <CardHeader className="bg-warning text-white">
+                    <h5>Add Employee</h5>
+                </CardHeader>
                 <CardBody>
                     {message && (
                         <Alert color={message.includes("successfully") ? "success" : "danger"}>{message}</Alert>
                     )}
-                    <Form onSubmit={handleSubmit} style={{ textAlign: 'left' }}>
+                    <Form onSubmit={handleSubmit}
+                        style={{ alignItems: 'normal', textAlign: 'left' }}
+                    >
                         <FormGroup>
                             <Label for="name">Name</Label>
                             <Input
@@ -67,6 +88,7 @@ const AddEmployee = () => {
                                 placeholder="Enter name"
                                 value={form.name}
                                 onChange={handleInputChange}
+                                style={inputStyle}
                                 required
                             />
                         </FormGroup>
@@ -79,6 +101,7 @@ const AddEmployee = () => {
                                 placeholder="Enter email"
                                 value={form.email}
                                 onChange={handleInputChange}
+                                style={inputStyle}
                                 required
                             />
                         </FormGroup>
@@ -91,6 +114,7 @@ const AddEmployee = () => {
                                 placeholder="Enter password"
                                 value={form.password}
                                 onChange={handleInputChange}
+                                style={inputStyle}
                                 required
                             />
                         </FormGroup>
@@ -102,9 +126,12 @@ const AddEmployee = () => {
                                 id="designation"
                                 value={form.designation}
                                 onChange={handleInputChange}
+                                style={inputStyle}
                                 required
                             >
-                                <option value="" disabled>Select designation</option>
+                                <option value="" disabled>
+                                    Select designation
+                                </option>
                                 <option value="Admin">Admin</option>
                                 <option value="Business Manager">Business Manager</option>
                                 <option value="CEO">CEO</option>
@@ -114,7 +141,6 @@ const AddEmployee = () => {
                                 <option value="Program Manager">Program Manager</option>
                             </Input>
                         </FormGroup>
-
                         <FormGroup>
                             <Label for="managerId">Manager</Label>
                             <Input
@@ -123,6 +149,7 @@ const AddEmployee = () => {
                                 id="managerId"
                                 value={form.managerId}
                                 onChange={handleInputChange}
+                                style={inputStyle}
                             >
                                 <option value="">Select manager</option>
                                 {managers.map((manager) => (
@@ -132,9 +159,9 @@ const AddEmployee = () => {
                                 ))}
                             </Input>
                         </FormGroup>
-                        <Button color="primary" type="submit" block>
+                        <button color="primary" type="submit" className="mt-3 mb-3" block>
                             Add Employee
-                        </Button>
+                        </button>
                     </Form>
                 </CardBody>
             </Card>

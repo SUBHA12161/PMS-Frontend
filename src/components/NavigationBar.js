@@ -1,11 +1,12 @@
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "../assets/css/NavigationBar.css";
 
 const NavigationBar = () => {
     const { user, logout } = useContext(AuthContext);
     const location = useLocation();
+    const navigate = useNavigate();
 
     const [dropdownOpen, setDropdownOpen] = useState({
         employee: false,
@@ -85,11 +86,19 @@ const NavigationBar = () => {
                                 { label: "Add Employee", path: "/add-employee" },
                                 { label: "View Employees", path: "/view-employees" },
                             ], "employee")}
-                        {renderDropdown("Review Management", [
+                        {/* {renderDropdown("Review Management", [
                             { label: "Manager Review", path: "/manager-review" },
                             { label: "View Review", path: "/view-review" },
                             { label: "Submit Self-Review", path: "/self-review" },
-                        ], "review")}
+                        ], "review")} */}
+                        {renderDropdown("KPI Management", [
+                            { label: "Add KPI", path: "/add-kpi" },
+                            { label: "View KPI", path: "/view-kpi" },
+                        ], "KPI")}
+                        {renderDropdown("Performance Management", [
+                            { label: "Add Performance", path: "/add-performance" },
+                            { label: "View Performance", path: "/view-performance" },
+                        ], "Performance")}
                     </>
                 );
             case "Executives/Associates":
@@ -105,7 +114,12 @@ const NavigationBar = () => {
     return (
         user ? (
             <div className="custom-navbar">
-                <div className="navbar-left">
+                <div className="navbar-left"
+                    onClick={() => {
+                        navigate('/home');
+                    }}
+                    style={{ cursor: 'pointer' }}
+                >
                     <img src="/logo.png" alt="Logo" className="navbar-logo" />
                     <span className="navbar-welcome">Welcome, {user?.name}</span>
                 </div>

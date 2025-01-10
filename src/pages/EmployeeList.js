@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Table } from "reactstrap";
 import { AuthContext } from "../context/AuthContext";
-import { Card, CardBody, CardHeader } from "reactstrap";
+import { Table } from "reactstrap";
+import { Card, CardBody, CardHeader, Alert } from "reactstrap";
 
 import "../assets/css/loader.css";
 
@@ -11,17 +11,26 @@ const EmployeeList = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage, setPerPage] = useState(10);
     const [totalEmployees, setTotalEmployees] = useState(0);
-
-    const { user } = useContext(AuthContext);
+    const [message, setMessage] = useState("");
+    const { user, logout, isTokenExpired } = useContext(AuthContext);
+    const token = localStorage.getItem("token");
 
     const fetchEmployees = async () => {
         setLoading(true);
         try {
-            const url =
+            if (isTokenExpired(token)) {
+                setMessage("Token has expired. Logging out...");
+                logout();
+                return;
+            }
+            const response = await fetch(
                 user.role === "Admin"
-                    ? `${process.env.REACT_APP_API_BASE_URL}/employees?page=${currentPage}&perPage=${perPage}`
-                    : `${process.env.REACT_APP_API_BASE_URL}/employees?managerId=${user._id || ""}&page=${currentPage}&perPage=${perPage}`;
-            const response = await fetch(url);
+                    ? `${process.env.REACT_APP_API_BASE_URL}/emp/get?page=${currentPage}&perPage=${perPage}`
+                    : `${process.env.REACT_APP_API_BASE_URL}/emp/get?managerId=${user._id || ""}&page=${currentPage}&perPage=${perPage}`
+                , {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                });
             const data = await response.json();
             setEmployees(data.employees);
             setTotalEmployees(data.total);
@@ -29,12 +38,15 @@ const EmployeeList = () => {
         } catch (error) {
             console.error("Error fetching employees:", error);
             setLoading(false);
+            setTimeout(() => {
+                logout();
+            }, 2000);
         }
     };
 
     useEffect(() => {
         fetchEmployees();
-    }, [currentPage, perPage]);
+    }, [currentPage, perPage, user]);
 
     const totalPages = Math.ceil(totalEmployees / perPage);
 
@@ -48,22 +60,26 @@ const EmployeeList = () => {
     }
 
     return (
-        <div className="container mt-5 pb-5">
+        <div className="container mt-5 pb-5 vh-100">
             <Card className="shadow">
                 <CardHeader className="bg-warning text-white d-flex justify-content-between align-items-center">
                     <h3 className="mb-0">Employee List</h3>
+                    {message && (
+                        <Alert color={"danger"}>{message}</Alert>
+                    )}
                     <div>
                         <label htmlFor="perPage" className="mr-2">
-                            Per Page:
+                            Per Page:&nbsp;&nbsp;
                         </label>
                         <select
                             id="perPage"
                             value={perPage}
                             onChange={(e) => {
                                 setPerPage(parseInt(e.target.value));
-                                setCurrentPage(1); // Reset to first page
+                                setCurrentPage(1);
                             }}
                             className="form-control d-inline-block w-auto"
+                            style={{ borderRadius: '12px' }}
                         >
                             <option value={5}>5</option>
                             <option value={10}>10</option>
@@ -81,32 +97,33 @@ const EmployeeList = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {employees.map((emp) => (
+                            {employees.length ? employees.map((emp) => (
                                 <tr key={emp._id}>
                                     <td>{emp.name}</td>
                                     <td>{emp.email}</td>
                                     <td>{emp.role}</td>
                                 </tr>
-                            ))}
+                            ))
+                                :
+                                "No data"
+                            }
                         </tbody>
                     </Table>
                     <div className="d-flex justify-content-between align-items-center mt-3">
-
                         <span>
                             Page {currentPage} of {totalPages}
                         </span>
 
-
-                        <div style={{ gap: 10 }}>
+                        <div className="d-flex justify-content-between" style={{ gap: 10 }}>
                             <button
-                                className="btn btn-primary"
+                                className="btn btn-sm btn-warning"
                                 disabled={currentPage === 1}
                                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                             >
                                 Previous
                             </button>
                             <button
-                                className="btn btn-primary"
+                                className="btn btn-sm btn-warning"
                                 disabled={currentPage === totalPages}
                                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                             >
