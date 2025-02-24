@@ -83,28 +83,28 @@ const NavigationBar = () => {
                     <>
                         {rolesWithEmployeeManagement.includes(user.role) &&
                             renderDropdown("Employee Management", [
-                                { label: "Add Employee", path: "/add-employee" },
+                                // { label: "Add Employee", path: "/add-employee" },
                                 { label: "View Employees", path: "/view-employees" },
                             ], "employee")}
-                        {/* {renderDropdown("Review Management", [
-                            { label: "Manager Review", path: "/manager-review" },
-                            { label: "View Review", path: "/view-review" },
-                            { label: "Submit Self-Review", path: "/self-review" },
-                        ], "review")} */}
                         {renderDropdown("KPI Management", [
                             { label: "Add KPI", path: "/add-kpi" },
                             { label: "View KPI", path: "/view-kpi" },
                         ], "KPI")}
-                        {renderDropdown("Performance Management", [
+                        {/*{renderDropdown("Review Management", [
+                            { label: "Manager Review", path: "/manager-review" },
+                            { label: "View Review", path: "/view-review" },
+                            { label: "Submit Self-Review", path: "/self-review" },
+                        ], "review")} 
+                         {renderDropdown("Performance Management", [
                             { label: "Add Performance", path: "/add-performance" },
                             { label: "View Performance", path: "/view-performance" },
-                        ], "Performance")}
+                        ], "Performance")} */}
                     </>
                 );
             case "Executives/Associates":
-                return renderDropdown("Review Management", [
-                    { label: "View Review", path: "/view-review" },
-                    { label: "Submit Self-Review", path: "/self-review" },
+                return renderDropdown("Performance", [
+                    { label: "View Performance", path: "/view-review" },
+                    // { label: "Submit Self-Review", path: "/self-review" },
                 ], "review");
             default:
                 return null;

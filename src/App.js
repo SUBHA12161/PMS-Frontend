@@ -22,10 +22,16 @@ const App = () => {
     <>
       <NavigationBar />
       <Routes>
-        {/* Redirect to login if not authenticated */}
         <Route
           path="/"
-          element={<Navigate to={user ? "/home" : "/auth"} replace />} />
+          element={<Navigate to={user ?
+            (
+              ["CEO", "Admin"].includes(user.role) ? "/home" :
+                (
+                  ["Program Head", "Program Manager", "Business Manager", "Manager"].includes(user.role) ? "/view-employees" : "/view-review"
+                )
+            )
+            : "/auth"} replace />} />
 
         {/* Authentication Form */}
         <Route path="/auth" element={<AuthForm />} />

@@ -19,3 +19,19 @@
     background-color: #6c757d;
     height: 100%;
 }
+
+.ioc-hover-effect:hover {
+    color: blue;
+    font-size: 25px;
+    cursor: pointer;
+}
+
+.back-btn-ioc:hover{
+    color: blue;
+    cursor: pointer;   
+}
+
+.card-none-border{
+    border: none !important;
+    border-radius: 0px !important;
+}

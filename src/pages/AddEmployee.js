@@ -15,7 +15,10 @@ const AddEmployee = () => {
 
     const fetchManagers = async () => {
         try {
-            const response = await fetch("/managers");
+            const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/users/managers`, {
+                method: "GET",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            });
             const data = await response.json();
             if (response.ok) {
                 setManagers(data.employees || []);

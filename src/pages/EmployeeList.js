@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { Table } from "reactstrap";
 import { Card, CardBody, CardHeader, Alert } from "reactstrap";
+import { useNavigate } from "react-router-dom";
 
 import "../assets/css/loader.css";
 
@@ -14,6 +15,7 @@ const EmployeeList = () => {
     const [message, setMessage] = useState("");
     const { user, logout, isTokenExpired } = useContext(AuthContext);
     const token = localStorage.getItem("token");
+    const navigate = useNavigate();
 
     const fetchEmployees = async () => {
         setLoading(true);
@@ -60,8 +62,8 @@ const EmployeeList = () => {
     }
 
     return (
-        <div className="container mt-5 pb-5 vh-100">
-            <Card className="shadow">
+        <div>
+            <Card className="card-none-border">
                 <CardHeader className="bg-warning text-white d-flex justify-content-between align-items-center">
                     <h3 className="mb-0">Employee List</h3>
                     {message && (
@@ -94,6 +96,8 @@ const EmployeeList = () => {
                                 <th style={{ width: "30%" }}>Name</th>
                                 <th style={{ width: "40%" }}>Email</th>
                                 <th style={{ width: "30%" }}>Designation</th>
+                                <th style={{ width: "30%" }}>Manage</th>
+                                <th style={{ width: "30%" }}>Performance</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -102,6 +106,22 @@ const EmployeeList = () => {
                                     <td>{emp.name}</td>
                                     <td>{emp.email}</td>
                                     <td>{emp.role}</td>
+                                    <td style={{ textAlign: 'center' }}>
+                                        <i
+                                            className="fa-solid fa-arrow-right fa-lg ioc-hover-effect"
+                                            onClick={() => {
+                                                navigate('/add-performance', { state: { id: emp._id, name: emp.name } });
+                                            }}
+                                        ></i>
+                                    </td>
+                                    <td style={{ textAlign: 'center' }}>
+                                        <i
+                                            className="fa-solid fa-eye fa-lg ioc-hover-effect"
+                                            onClick={() => {
+                                                navigate('/view-performance', { state: { id: emp._id } });
+                                            }}
+                                        ></i>
+                                    </td>
                                 </tr>
                             ))
                                 :

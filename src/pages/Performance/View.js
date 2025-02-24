@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Card, CardBody, CardHeader, Table, Alert } from "reactstrap";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Card, CardBody, CardHeader, Table, Alert, Modal, ModalHeader, ModalBody, ModalFooter, Row, Col, Label, Input, Button } from "reactstrap";
 import "../../assets/css/loader.css";
 
 const PerformanceList = () => {
@@ -9,39 +10,48 @@ const PerformanceList = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedData, setSelectedData] = useState({ _id: "", manager_achievement: "", remarks: "" });
+    const location = useLocation();
+    const empId = location.state?.id;
+    const navigate = useNavigate();
+
+    const toggleModal = () => {
+        setIsModalOpen(!isModalOpen);
+    };
+
+    const fetchPerformanceData = async () => {
+        try {
+            setLoading(true);
+            const token = localStorage.getItem("token");
+            const response = await fetch(
+                `${process.env.REACT_APP_API_BASE_URL}/Performance/get?uId=${empId}&page=${currentPage}&perPage=${perPage}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (!response.ok) {
+                setLoading(false);
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            setPerformances(data.performances);
+            setTotalPages(data.totalPages);
+            setLoading(false);
+        } catch (error) {
+            setLoading(false);
+            setMessage("Failed to fetch performance data.");
+            console.error("Error fetching performance data:", error);
+        }
+    };
 
     useEffect(() => {
-        const fetchPerformanceData = async () => {
-            try {
-                setLoading(true);
-                const token = localStorage.getItem("token");
-                const response = await fetch(
-                    `${process.env.REACT_APP_API_BASE_URL}/Performance/get?page=${currentPage}&perPage=${perPage}`,
-                    {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `Bearer ${token}`,
-                        },
-                    }
-                );
-
-                if (!response.ok) {
-                    setLoading(false);
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                setPerformances(data.performances);
-                setTotalPages(data.totalPages);
-                setLoading(false);
-            } catch (error) {
-                setLoading(false);
-                setMessage("Failed to fetch performance data.");
-                console.error("Error fetching performance data:", error);
-            }
-        };
-
         fetchPerformanceData();
     }, [currentPage, perPage]);
 
@@ -55,10 +65,14 @@ const PerformanceList = () => {
     }
 
     return (
-        <div className="container mt-5 pb-5 vh-100">
-            <Card className="shadow">
+        <div>
+            <Card className="card-none-border">
                 <CardHeader className="bg-warning text-white d-flex justify-content-between align-items-center">
-                    <h3 className="mb-0">Performance List</h3>
+                    <h3 className="mb-0">
+                        <i className="fa-solid fa-arrow-left back-btn-ioc"
+                            onClick={() => navigate(-1)}
+                        ></i>&nbsp;
+                        Performance List</h3>
                     {message && <Alert color={"danger"}>{message}</Alert>}
                     <div>
                         <label htmlFor="perPage" className="mr-2">
@@ -88,9 +102,11 @@ const PerformanceList = () => {
                                 <th style={{ width: "25%" }}>KPI</th>
                                 <th style={{ width: "5%" }}>Weightage</th>
                                 <th style={{ width: "5%" }}>Goal</th>
-                                <th style={{ width: "5%" }}>Achievement</th>
+                                <th style={{ width: "5%" }}>Employee Achievement</th>
+                                <th style={{ width: "5%" }}>Manager Achievement</th>
                                 <th style={{ width: "20%" }}>Weighted each rating</th>
                                 <th style={{ width: "30%" }}>Qualitative Feedback by Manager</th>
+                                <th style={{ width: "5%" }}>Edit</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -99,16 +115,25 @@ const PerformanceList = () => {
                                     <tr key={performance._id}>
                                         <td>{performance.employeeName}</td>
                                         <td>{performance.kpiName}</td>
-                                        <td>{performance.kpiWeightage}</td>
-                                        <td>{performance.kpiGoal}</td>
-                                        <td>{performance.kpiAchievement}</td>
+                                        <td>{performance.weightage}</td>
+                                        <td>{performance.goal}</td>
+                                        <td>{performance.emp_achievement}</td>
+                                        <td>{performance.achievement}</td>
                                         <td>{performance.average}</td>
                                         <td>{performance.remarks}</td>
+                                        <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                                            <i class="fa-solid fa-file-pen fa-lg ioc-hover-effect"
+                                                onClick={() => {
+                                                    setSelectedData({ _id: performance._id })
+                                                    toggleModal();
+                                                }}
+                                            ></i>
+                                        </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="7" className="text-center">
+                                    <td colSpan="8" className="text-center">
                                         No data available.
                                     </td>
                                 </tr>
@@ -139,6 +164,58 @@ const PerformanceList = () => {
                     </div>
                 </CardBody>
             </Card>
+
+            {isModalOpen && <div className="modal-open-blur"></div>}
+
+            <Modal isOpen={isModalOpen} toggle={toggleModal} backdrop={false} centered>
+                <ModalHeader toggle={toggleModal}>Add Achievement</ModalHeader>
+                <ModalBody>
+                    <Row>
+                        <Col md={12}>
+                            <Label for="manager_achievement">Employee Achievement</Label>
+                            <Input
+                                type="number"
+                                id="manager_achievement"
+                                value={selectedData.manager_achievement}
+                                onChange={(e) =>
+                                    setSelectedData((prevState) => ({
+                                        ...prevState,
+                                        manager_achievement: e.target.value,
+                                    }))
+                                }
+                                min={0}
+                            />
+                        </Col>
+
+                        <Col md={12}>
+                            <Label for="remarks">Qualitative Feedback by Manager</Label>
+                            <Input
+                                type="textarea"
+                                id="remarks"
+                                value={selectedData.remarks}
+                                onChange={(e) =>
+                                    setSelectedData((prevState) => ({
+                                        ...prevState,
+                                        remarks: e.target.value,
+                                    }))
+                                }
+                                style={{ resize: "vertical" }}
+                                placeholder="Add your remarks"
+                            />
+                        </Col>
+                    </Row>
+                </ModalBody>
+                <ModalFooter>
+                    <Button color="success"
+                        // onClick={updateAchievement}
+                        className="cust-btn">
+                        Save
+                    </Button>
+                    <Button color="secondary" onClick={toggleModal} className="cust-btn-warn">
+                        Cancel
+                    </Button>
+                </ModalFooter>
+            </Modal>
         </div>
     );
 };
