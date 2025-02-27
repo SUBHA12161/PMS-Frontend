@@ -51,6 +51,36 @@ const PerformanceList = () => {
         }
     };
 
+    const updateAchievement = async ()=>{
+        try {
+            setLoading(true);
+            const token = localStorage.getItem("token");
+            const response = await fetch(
+                `${process.env.REACT_APP_API_BASE_URL}/Performance/updateManager`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify(selectedData),
+                }
+            );
+
+            if (!response.ok) {
+                setLoading(false);
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            fetchPerformanceData();
+            toggleModal();
+        } catch (error) {
+            setLoading(false);
+            setMessage("Failed to fetch performance data.");
+            console.error("Error fetching performance data:", error);
+        }
+    }
+
     useEffect(() => {
         fetchPerformanceData();
     }, [currentPage, perPage]);
@@ -119,7 +149,7 @@ const PerformanceList = () => {
                                         <td>{performance.goal}</td>
                                         <td>{performance.emp_achievement}</td>
                                         <td>{performance.achievement}</td>
-                                        <td>{performance.average}</td>
+                                        <td>{parseFloat(performance.average).toFixed(2)}</td>
                                         <td>{performance.remarks}</td>
                                         <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
                                             <i class="fa-solid fa-file-pen fa-lg ioc-hover-effect"
@@ -207,7 +237,7 @@ const PerformanceList = () => {
                 </ModalBody>
                 <ModalFooter>
                     <Button color="success"
-                        // onClick={updateAchievement}
+                        onClick={updateAchievement}
                         className="cust-btn">
                         Save
                     </Button>
